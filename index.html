@@ -48,7 +48,7 @@ main{flex:1;overflow-y:auto;padding:14px 12px 110px}
 .tile.w{grid-column:span 3;padding:18px 6px 14px}
 .tile svg{width:58px;height:58px;stroke:var(--accent);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .tile.w svg{width:66px;height:66px}
-.tile b{font-size:15px}
+.tile b{font-size:15px;text-align:center;line-height:1.2}
 .tile small{font-size:11.5px;color:var(--muted);text-align:center;min-height:15px}
 .badge{position:absolute;top:8px;right:8px;background:var(--r-bd);color:#fff;border-radius:11px;min-width:22px;height:22px;line-height:22px;font-size:12px;font-weight:700;padding:0 6px}
 .links{display:flex;flex-direction:column;gap:8px;margin-top:16px}
@@ -129,8 +129,10 @@ code{background:var(--bg);padding:2px 6px;border-radius:6px;font-size:14px;overf
     <h3>Modifica prodotto</h3>
     <label>Nome<input type="text" id="edName" autocomplete="off" maxlength="60" required></label>
     <label>Dove si trova<select id="edLoc">
-      <option value="frigo">Frigo</option><option value="armadio">Armadio</option>
-      <option value="dispensa">Dispensa</option><option value="tantum">Una tantum</option>
+      <option value="frigo">Frigo</option><option value="freezer">Freezer</option>
+      <option value="bevande">Frigo beveraggi</option><option value="armadio">Armadio</option>
+      <option value="dispensa">Dispensa</option><option value="cantinetta">Cantinetta</option>
+      <option value="tantum">Una tantum</option>
     </select></label>
     <div class="actions">
       <button type="button" class="btn danger" id="edDel">Elimina</button>
@@ -148,10 +150,10 @@ code{background:var(--bg);padding:2px 6px;border-radius:6px;font-size:14px;overf
 const DEFAULT_SERVER = 'https://dispensa.loki4683.workers.dev';
 
 const KEY = 'dispensa-v2', KEY_SYNC = 'dispensa-sync', KEY_SRV = 'dispensa-server';
-const LOCS = {frigo:'Frigo', armadio:'Armadio', dispensa:'Dispensa'};
+const LOCS = {frigo:'Frigo', freezer:'Freezer', bevande:'Frigo beveraggi', armadio:'Armadio', dispensa:'Dispensa', cantinetta:'Cantinetta'};
 const NOMI = Object.assign({tantum:'Una tantum'}, LOCS);
-const TITOLI = {home:'Dispensa', frigo:'Frigo', armadio:'Armadio', dispensa:'Dispensa', carrello:'Carrello della spesa',
-  ricette:'Ricettario', tantum:'Prodotti una tantum', storico:'Spese fatte', condividi:'Lista condivisa'};
+const TITOLI = Object.assign({home:'Dispensa', carrello:'Carrello della spesa',
+  ricette:'Ricettario', tantum:'Prodotti una tantum', storico:'Spese fatte', condividi:'Lista condivisa'}, LOCS);
 const TOMB_MS = 60 * 86400000;
 
 const $ = s => document.querySelector(s);
@@ -262,6 +264,9 @@ const ICO = {
   frigo:'<svg viewBox="0 0 64 64"><rect x="16" y="5" width="32" height="52" rx="5"/><path d="M16 25h32M23 12v7M23 32v10M21 57v3M43 57v3"/></svg>',
   armadio:'<svg viewBox="0 0 64 64"><rect x="8" y="9" width="48" height="45" rx="4"/><path d="M32 9v45M14 54v5M50 54v5"/><circle cx="26.5" cy="32" r="1.8"/><circle cx="37.5" cy="32" r="1.8"/></svg>',
   dispensa:'<svg viewBox="0 0 64 64"><rect x="8" y="5" width="48" height="54" rx="4"/><path d="M8 23h48M8 41h48"/><rect x="14" y="11" width="8" height="12" rx="2"/><rect x="27" y="14" width="10" height="9" rx="2"/><circle cx="46" cy="17.5" r="5"/><rect x="14" y="30" width="12" height="11" rx="2"/><rect x="32" y="28" width="7" height="13" rx="2"/><rect x="43" y="32" width="8" height="9" rx="2"/><rect x="14" y="48" width="10" height="11" rx="2"/><rect x="30" y="50" width="18" height="9" rx="2"/></svg>',
+  freezer:'<svg viewBox="0 0 64 64"><rect x="14" y="5" width="36" height="52" rx="5"/><path d="M20 57v3M44 57v3M32 17v28M20 24l24 14M44 24L20 38M28 18l4 3 4-3M28 44l4-3 4 3"/></svg>',
+  bevande:'<svg viewBox="0 0 64 64"><rect x="13" y="4" width="38" height="54" rx="4"/><rect x="18" y="9" width="28" height="44" rx="2"/><path d="M18 31h28M45 24v14M19 58v3M45 58v3"/><path d="M23 29v-9l1.5-3v-3h2v3l1.5 3v9zM32 29v-12h5v12zM23 51v-11l1.5-3v-2h2v2l1.5 3v11zM32 51v-9h6v9z"/></svg>',
+  cantinetta:'<svg viewBox="0 0 64 64"><rect x="8" y="5" width="48" height="54" rx="4"/><path d="M8 23h48M8 41h48"/><circle cx="18" cy="14" r="4.5"/><circle cx="32" cy="14" r="4.5"/><circle cx="46" cy="14" r="4.5"/><circle cx="18" cy="32" r="4.5"/><circle cx="32" cy="32" r="4.5"/><circle cx="46" cy="32" r="4.5"/><circle cx="18" cy="50" r="4.5"/><circle cx="32" cy="50" r="4.5"/><circle cx="46" cy="50" r="4.5"/><circle cx="18" cy="14" r="1.2"/><circle cx="32" cy="32" r="1.2"/><circle cx="46" cy="50" r="1.2"/></svg>',
   carrello:'<svg viewBox="0 0 64 64"><path d="M5 10h9l7 31h27l7-23H16"/><circle cx="24" cy="51" r="4"/><circle cx="45" cy="51" r="4"/></svg>',
   ricette:'<svg viewBox="0 0 64 64"><rect x="11" y="5" width="42" height="54" rx="5"/><path d="M20 5v54"/><ellipse cx="31" cy="22" rx="4" ry="6"/><path d="M31 28v18M43 15v31M39 15v8a4 4 0 0 0 8 0v-8"/></svg>'
 };
@@ -275,7 +280,7 @@ function vHome(){
     '<b>' + name + '</b><small>' + s + '</small>' + (badge ? '<span class="badge">' + badge + '</span>' : '') + '</button>';
   const nT = all.filter(p => p.l === 'tantum').length, nS = Object.values(S.s).filter(x => !x.d).length;
   main.innerHTML = '<div class="tiles">' +
-    tile('frigo', 'Frigo', sub('frigo')) + tile('armadio', 'Armadio', sub('armadio')) + tile('dispensa', 'Dispensa', sub('dispensa')) +
+    Object.keys(LOCS).map(l => tile(l, LOCS[l], sub(l))).join('') +
     tile('carrello', 'Carrello della spesa', nCart ? pl(nCart, 'prodotto', 'prodotti') + ' da comprare' : 'Vuoto', 1, nCart) +
     tile('ricette', 'Ricettario', 'Idee con quello che hai', 1) + '</div>' +
     '<div class="links">' +
@@ -307,10 +312,10 @@ function vLoc(){
 function vCarrello(){
   const list = live().filter(p => p.c);
   let h = '';
-  if (!list.length) h = '<div class="empty">Il carrello è vuoto.<br>Tocca un prodotto in Frigo, Armadio o Dispensa per metterlo qui, oppure aggiungi un prodotto una tantum.</div>';
+  if (!list.length) h = '<div class="empty">Il carrello è vuoto.<br>Tocca un prodotto in uno dei tuoi spazi (Frigo, Dispensa…) per metterlo qui, oppure aggiungi un prodotto una tantum.</div>';
   else {
     h = '<p class="hint">Tocca un prodotto quando lo hai preso. Alla fine premi «Spesa eseguita».</p>';
-    for (const l of ['frigo','armadio','dispensa','tantum']){
+    for (const l of Object.keys(LOCS).concat('tantum')){
       const g = list.filter(p => p.l === l).sort(byName);
       if (!g.length) continue;
       h += '<h2>' + NOMI[l] + '</h2>' + g.map(p => {
@@ -499,7 +504,7 @@ function vRicette(){
   const v = valutaRicette();
   bar.hidden = true;
   if (!v.n){
-    main.innerHTML = '<div class="empty">Per avere delle proposte, segna prima cosa c’è in Frigo, Armadio e Dispensa.</div>';
+    main.innerHTML = '<div class="empty">Per avere delle proposte, segna prima cosa c’è in casa (Frigo, Dispensa e gli altri spazi).</div>';
     return;
   }
   const card = x => '<details class="box" data-r="' + x.idx + '"><summary><b>' + esc(x.r.n) + '</b><span>' + x.r.t + ' min<br>' +
@@ -510,7 +515,7 @@ function vRicette(){
   const ord = (a, b) => (b.have / b.tot - a.have / a.tot) || a.r.t - b.r.t;
   const ok = v.r.filter(x => !x.miss).sort((a, b) => a.r.t - b.r.t);
   const quasi = v.r.filter(x => x.miss && x.miss <= 2 && x.have > 0).sort((a, b) => a.miss - b.miss || ord(a, b));
-  let h = '<p class="hint">Proposte calcolate su ' + pl(v.n, 'prodotto presente', 'prodotti presenti') + ' tra Frigo, Armadio e Dispensa. Olio, sale, pepe e acqua si danno per scontati.</p>';
+  let h = '<p class="hint">Proposte calcolate su ' + pl(v.n, 'prodotto presente', 'prodotti presenti') + ' in casa. Olio, sale, pepe e acqua si danno per scontati.</p>';
   h += '<h2>Puoi farle adesso</h2>' + (ok.length ? ok.map(card).join('') : '<div class="box"><p>Nessuna ricetta completa con quello che c’è ora.</p></div>');
   if (quasi.length) h += '<h2>Ti manca poco</h2>' + quasi.map(card).join('');
   main.innerHTML = h;

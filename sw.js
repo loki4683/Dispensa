@@ -1,5 +1,5 @@
 // Dispensa — service worker: funziona offline e si aggiorna da solo quando c'è rete
-const CACHE = 'dispensa-v3';
+const CACHE = 'dispensa-v4';
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
